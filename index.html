@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Indian Islahi Center | Al Khobar</title>
     
     <!-- Tailwind CSS for Professional Styling -->
@@ -157,7 +157,7 @@
                     <!-- Display -->
                     <div class="bg-white border-2 border-gray-200 rounded-2xl p-4 flex items-center justify-center h-20 shadow-inner">
                         <span id="display" class="text-3xl font-mono font-bold text-gray-800 tracking-widest placeholder-gray-300"></span>
-                        <span id="placeholder" class="text-gray-300 text-lg absolute pointer-events-none">Enter Mobile Number Without Country Code</span>
+                        <span id="placeholder" class="text-gray-300 text-lg absolute pointer-events-none">05xxxxxxxx or 9061xxxxxx</span>
                     </div>
 
                     <!-- Keypad -->
@@ -398,7 +398,7 @@
                 document.getElementById('r-place').textContent = student.place;
                 document.getElementById('r-score').textContent = student.score;
 
-                if (student.score >= 20) {
+                if (student.score >= 15) {
                     confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#009688', '#ffb300'] });
                 }
             } else {
