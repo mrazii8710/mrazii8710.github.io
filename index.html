@@ -63,7 +63,7 @@
                 <img src="logo.png" onerror="this.style.display='none'" class="h-12 w-12 object-contain drop-shadow-md">
                 <div>
                     <h1 class="text-xl font-bold text-brand-900 tracking-tight" id="desk-title">IIC Khobar</h1>
-                    <p class="text-xs text-gray-500 font-medium tracking-wide uppercase">Wisdom & Education</p>
+                    <p class="text-xs text-gray-500 font-medium tracking-wide uppercase">Al Khobar</p>
                 </div>
             </div>
             <nav class="flex gap-1">
@@ -111,7 +111,7 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-1">
                 <div class="px-5 py-3">
                     <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2 mb-3">
-                        <i class="fas fa-map-marker-alt text-red-500"></i> Location Map
+                        <i class="fas fa-map-marker-alt text-red-500"></i> Center Location Map
                     </h3>
                     <div class="map-container bg-gray-200 rounded-xl">
                         <iframe id="gmap" frameborder="0"></iframe>
@@ -133,7 +133,7 @@
                 <!-- Week Selector -->
                 <div class="relative">
                     <select id="week-selector" onchange="loadWeek()" class="w-full appearance-none bg-white border border-gray-300 hover:border-brand-500 text-gray-700 py-4 px-5 pr-8 rounded-xl leading-tight focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent shadow-sm transition-all font-medium text-lg cursor-pointer">
-                        <option value="" disabled selected>👇 Select Exam Week</option>
+                        <option value="" disabled selected>Select Exam Week</option>
                     </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
                         <i class="fas fa-chevron-down"></i>
@@ -149,7 +149,7 @@
                 <div id="wait-view" class="hidden bg-amber-50 border border-amber-100 rounded-2xl p-8 text-center">
                     <div class="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">⏳</div>
                     <h3 class="text-lg font-bold text-amber-800 mb-1">Results Coming Soon</h3>
-                    <p class="text-amber-700 text-sm">The results for this week are currently being compiled.</p>
+                    <p class="text-amber-700 text-sm">The results for this week are not yet published.</p>
                 </div>
 
                 <!-- Search UI -->
@@ -157,7 +157,7 @@
                     <!-- Display -->
                     <div class="bg-white border-2 border-gray-200 rounded-2xl p-4 flex items-center justify-center h-20 shadow-inner">
                         <span id="display" class="text-3xl font-mono font-bold text-gray-800 tracking-widest placeholder-gray-300"></span>
-                        <span id="placeholder" class="text-gray-300 text-lg absolute pointer-events-none">Enter Number</span>
+                        <span id="placeholder" class="text-gray-300 text-lg absolute pointer-events-none">Enter Mobile Number</span>
                     </div>
 
                     <!-- Keypad -->
