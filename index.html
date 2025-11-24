@@ -3,60 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <title>Exam Results Lookup - kiic.online</title>
+    
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-        input[type="text"], button { padding: 10px; margin: 10px 0; width: 80%; }
-        #results-display { margin-top: 20px; text-align: left; padding: 15px; border: 1px solid #007bff; border-radius: 5px; }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+        input[type="text"], button { padding: 12px; margin: 10px 0; width: 80%; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
+        button { background-color: #007bff; color: white; cursor: pointer; border: none; transition: background-color 0.3s; }
+        button:hover { background-color: #0056b3; }
+        #results-display { margin-top: 20px; text-align: left; padding: 15px; min-height: 80px; }
         .error { color: red; font-weight: bold; }
+        .result-box { background-color: #e6f7ff; padding: 20px; border-radius: 8px; border-left: 5px solid #007bff; }
     </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sql.js-httpvfs@0.14.0/dist/sql-js-httpvfs.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Check Your Exam Results</h1>
-        <input type="text" id="mobileInput" placeholder="Enter Mobile Number" maxlength="10">
+        <input type="text" id="mobileInput" placeholder="Enter Mobile Number (10 digits)" maxlength="10">
         <button onclick="lookupResult()">Check Results</button>
         
         <div id="results-display">
-            Enter your 10-digit mobile number above to see your score.
+            Enter your mobile number above to securely check your result.
         </div>
     </div>
 
     <script>
-        function lookupResult() {
-            const mobile = document.getElementById('mobileInput').value.trim();
-            const display = document.getElementById('results-display');
-            display.innerHTML = 'Searching...';
+        // --- Configuration for the SQLite Worker ---
+        const config = {
+          from: 'inline',
+          config: {
+            serverMode: 'full',
+            // IMPORTANT: This URL points to the file you uploaded in Phase 2
+            url: './results.sqlite', 
+            requestChunkSize: 4096, 
+          },
+        };
 
-            // 1. Fetch the entire JSON data file from the static server
-            fetch('results.json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Could not load results data.');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // 2. Look up the result in the loaded array using JavaScript
-                    const result = data.find(student => student.mobile === mobile);
+        let worker = null;
 
-                    if (result) {
-                        // 3. Display the found result (Beautifully!)
-                        display.innerHTML = `
-                            <h2>Result for ${result.mobile}</h2>
-                            <p><strong>Name:</strong> ${result.name}</p>
-                            <p><strong>Score:</strong> <span style="font-size: 1.5em; color: green;">${result.score}</span></p>
-                            <p><strong>Grade:</strong> ${result.grade}</p>
-                            <p><strong>Remarks:</strong> ${result.details}</p>
-                        `;
-                    } else {
-                        // 4. Handle Not Found
-                        display.innerHTML = '<p class="error">Results not found for that mobile number. Please try again.</p>';
-                    }
-                })
-                .catch(error => {
-                    display.innerHTML = `<p class="error">An error occurred: ${error.message}</p>`;
-                });
+        // Function to initialize the database connection
+        async function initDB() {
+          const { createDbWorker } = window.sql_js_httpvfs;
+          const workerUrl = 'https://cdn.jsdelivr.net/npm/sql.js-httpvfs@0.14.0/dist/sqlite.worker.js';
+          const wasmUrl = 'https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.wasm';
+          
+          return createDbWorker([config], workerUrl, wasmUrl);
+        }
+
+        // Function triggered when the user clicks the "Check Results" button
+        async function lookupResult() {
+          const mobile = document.getElementById('mobileInput').value.trim();
+          const display = document.getElementById('results-display');
+          display.innerHTML = 'Searching database...';
+
+          if (mobile.length !== 10) {
+            display.innerHTML = '<p class="error">Please enter a valid 10-digit mobile number.</p>';
+            return;
+          }
+
+          try {
+            // 1. Initialize DB connection if it's the first lookup
+            if (!worker) {
+              display.innerHTML = 'Initializing secure connection...';
+              worker = await initDB();
+            }
+
+            // 2. Run the SQL query (only fetches the needed data chunk)
+            const result = await worker.db.query(
+              `SELECT name, score, grade FROM Results WHERE mobile_number = ?`, 
+              [mobile]
+            );
+
+            if (result.length > 0) {
+              const student = result[0];
+              // 3. Display the found result beautifully!
+              display.innerHTML = `
+                <div class="result-box">
+                    <h2>✅ Result Found!</h2>
+                    <p><strong>Name:</strong> ${student.name}</p>
+                    <p><strong>Score:</strong> <span style="font-size: 1.8em; color: #007bff; font-weight: bold;">${student.score}</span></p>
+                    <p><strong>Grade:</strong> <span style="font-weight: bold; color: green;">${student.grade}</span></p>
+                </div>
+              `;
+            } else {
+              display.innerHTML = '<p class="error">Result not found for that mobile number.</p>';
+            }
+
+          } catch (error) {
+            console.error("Database Error:", error);
+            display.innerHTML = `<p class="error">A serious error occurred. Make sure your 'results.sqlite' file is in the root directory.</p>`;
+          }
         }
     </script>
 </body>
