@@ -6,21 +6,15 @@
 // 1. WEEKLY EXAM RESULTS
 const examConfig = [
     {
-        id: "week_1",
-        label: "Week 1: Basic Tajweed (Oct 20)",
-        file: "data/week_1.json",
+        id: "week_4",
+        label: "Week 4: QHLC WEEKLY EXAM - AN-NAML(54-66)",
+        file: "data/week_4.json",
         published: true
     },
     {
-        id: "week_2",
-        label: "Week 2: Hifz Surah Al-Mulk (Oct 27)",
-        file: "data/week_2.json",
-        published: true
-    },
-    {
-        id: "week_3",
-        label: "Week 3: Seerah Quiz (Nov 03)",
-        file: "data/week_3.json",
+        id: "week_5",
+        label: "Week 5: QHLC WEEKLY EXAM - AN-NAML(67-82)",
+        file: "data/week_5.json",
         published: false
     }
 ];
@@ -28,10 +22,7 @@ const examConfig = [
 // 2. WEEKLY PROGRAMS LIST (Displayed on Home Tab)
 const programsList = [
     { title: "Friday Class", time: "Fri 1:00 PM", icon: "📖" },
-    { title: "Quran Tafseer",   time: "Fri 8:00 PM",  icon: "📖" },
-    { title: "Ladies Halqa",    time: "Tue 4:30 PM",  icon: "🧕" },
-    { title: "Youth Meet",      time: "Thu 9:00 PM",  icon: "🤝" },
-    { title: "Tajweed Class",   time: "Sat 7:00 PM",  icon: "🎓" } // Add/Remove lines as needed
+    { title: "Youth Meet", time: "Thu 9:00 PM",  icon: "🤝" } // Add/Remove lines as needed
 ];
 
 // 3. CENTER INFORMATION
