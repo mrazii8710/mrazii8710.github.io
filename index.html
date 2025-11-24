@@ -5,282 +5,445 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Indian Islahi Center | Al Khobar</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
-    <!-- Load the Master Config File -->
     <script src="config.js"></script>
 
     <style>
         :root {
-            --primary: #006064;
-            --primary-light: #00838f;
-            --accent: #ffc107;
-            --bg-gradient: #f0f2f5;
-            --glass: rgba(255, 255, 255, 1);
-            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --primary: #00695c; /* Deep Teal */
+            --primary-dark: #004d40;
+            --accent: #ffb300;
+            --bg: #f4f7f6;
+            --white: #ffffff;
+            --text: #263238;
+            --shadow: 0 8px 30px rgba(0,0,0,0.08);
+            --radius: 16px;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg-gradient);
+            background: var(--bg);
             margin: 0;
-            padding-bottom: 80px;
-            color: #333;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* --- Navigation --- */
-        .bottom-nav {
-            position: fixed; bottom: 0; width: 100%; background: white;
-            display: flex; justify-content: space-around; padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000;
+        /* --- LAYOUT CONTAINER --- */
+        .app-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex: 1;
+            overflow: hidden;
         }
-        .nav-item { text-align: center; color: #888; font-size: 0.8rem; cursor: pointer; flex: 1; }
-        .nav-item.active { color: var(--primary); font-weight: bold; }
-        .nav-icon { font-size: 1.5rem; display: block; margin-bottom: 2px; }
 
-        /* --- Sections --- */
-        .section { display: none; padding: 20px; max-width: 500px; margin: 0 auto; }
-        .section.active { display: block; animation: fadeIn 0.3s ease-in; }
+        /* --- NAVIGATION --- */
+        /* Mobile Bottom Nav */
+        .nav-bar {
+            position: fixed; bottom: 0; width: 100%; background: var(--white);
+            display: flex; justify-content: space-around; padding: 12px 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05); z-index: 1000;
+            transition: all 0.3s;
+        }
 
-        /* --- Styles --- */
-        .header-card {
-            background: var(--primary); color: white; padding: 30px 20px;
-            border-radius: 0 0 24px 24px; text-align: center; margin: -20px -20px 20px -20px;
+        .nav-item {
+            text-align: center; color: #90a4ae; font-size: 0.85rem; cursor: pointer; flex: 1;
+            transition: color 0.2s;
+        }
+        .nav-item.active { color: var(--primary); font-weight: 700; }
+        .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+
+        /* --- CONTENT AREA --- */
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            padding-bottom: 90px; /* Space for mobile nav */
+            overflow-y: auto;
+        }
+
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .section.active { display: block; }
+
+        /* --- CARDS & WIDGETS --- */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 25px;
             box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid rgba(0,0,0,0.02);
         }
-        .logo-placeholder {
-            width: 80px; height: 80px; background: white; border-radius: 50%;
-            margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: var(--primary); font-size: 2rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        .info-card {
-            background: white; border-radius: 16px; padding: 20px;
-            margin-bottom: 15px; box-shadow: var(--shadow);
-        }
-        .info-card h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .program-list { list-style: none; padding: 0; }
-        .program-list li { padding: 12px 0; border-bottom: 1px dashed #eee; display: flex; justify-content: space-between; }
-        .program-list li:last-child { border-bottom: none; }
-        .time-badge { background: #e0f7fa; color: var(--primary); padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
-        .map-container iframe { width: 100%; height: 200px; border: 0; border-radius: 12px; }
 
-        /* Results Styles */
-        select.week-select {
-            width: 100%; padding: 15px; border-radius: 12px;
-            border: 2px solid var(--primary); font-size: 1rem; background: white;
-            margin-bottom: 20px; outline: none;
+        /* Header Styling */
+        .header-hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 0 0 30px 30px;
+            text-align: center;
+            margin: -20px -20px 30px -20px;
+            box-shadow: var(--shadow);
+            position: relative;
         }
-        .loading-spinner { text-align: center; color: var(--primary); display: none; margin-bottom: 15px; }
-        .locked-message { text-align: center; padding: 40px 20px; background: white; border-radius: 16px; box-shadow: var(--shadow); }
-        .locked-icon { font-size: 3rem; color: #ffc107; margin-bottom: 15px; display: block; }
+
+        .logo-container {
+            width: 100px; height: 100px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            overflow: hidden;
+            border: 4px solid rgba(255,255,255,0.3);
+        }
+
+        .logo-img { width: 100%; height: 100%; object-fit: cover; }
+        .logo-text { font-size: 2.5rem; font-weight: bold; color: var(--primary); }
+
+        .center-name { margin: 0; font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
+        .center-loc { opacity: 0.9; font-size: 1rem; margin-top: 5px; }
+
+        /* Programs List */
+        .program-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 15px 0; border-bottom: 1px solid #eee;
+        }
+        .program-item:last-child { border-bottom: none; }
+        .prog-info { display: flex; align-items: center; gap: 15px; }
+        .prog-icon { font-size: 1.5rem; background: #e0f2f1; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+        .prog-time { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+
+        /* Map */
+        .map-frame { width: 100%; height: 250px; border: 0; border-radius: var(--radius); }
+
+        /* Results UI */
+        .week-select {
+            width: 100%; padding: 15px; border-radius: 12px;
+            border: 2px solid #eee; font-size: 1rem; background: white;
+            margin-bottom: 25px; outline: none; cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .week-select:focus { border-color: var(--primary); }
 
         /* Numpad */
         .display-screen {
-            background: white; border: 2px solid #e0e0e0; border-radius: 12px;
-            padding: 15px; margin-bottom: 20px; font-size: 1.5rem; font-weight: bold;
-            text-align: center; letter-spacing: 3px; height: 30px;
+            background: #f5f7f9; border: 2px solid #eceff1; border-radius: 12px;
+            padding: 20px; margin-bottom: 20px; font-size: 2rem; font-weight: bold;
+            text-align: center; letter-spacing: 4px; color: var(--primary-dark); min-height: 80px;
+            display: flex; align-items: center; justify-content: center;
         }
-        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .numpad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 400px; margin: 0 auto; }
         .num-btn {
-            background: white; border: 1px solid #ddd; border-radius: 10px;
-            padding: 15px; font-size: 1.2rem; cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background: white; border: none; border-radius: 12px;
+            padding: 20px; font-size: 1.4rem; font-weight: 600; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03); color: var(--text);
+            transition: transform 0.1s, box-shadow 0.1s;
         }
-        .num-btn:active { background: #f0f0f0; }
-        .search-btn { grid-column: span 3; background: var(--primary); color: white; border: none; }
-        .clear-btn { color: #dc3545; background: #fff5f5; border-color: #ffcccc; }
+        .num-btn:active { transform: scale(0.95); }
+        .num-btn:hover { box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
+        .search-btn { grid-column: span 3; background: var(--primary); color: white; margin-top: 10px; }
+        .clear-btn { background: #ffebee; color: #d32f2f; }
 
-        .result-card {
-            background: white; padding: 25px; border-radius: 16px; margin-top: 20px;
-            box-shadow: var(--shadow); text-align: left; display: none;
-            border-top: 5px solid var(--primary);
+        /* Results Card */
+        .result-box {
+            background: white; border-radius: var(--radius); padding: 30px;
+            text-align: center; margin-top: 20px;
+            border: 2px solid var(--primary);
+            display: none;
         }
-        .result-row { display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px dashed #eee; padding-bottom: 8px; }
-        .score-badge { background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; }
-        .error-msg { color: red; text-align: center; margin-top: 10px; display: none; }
+        .res-score-big { font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 10px 0; }
+        .res-detail { font-size: 1.1rem; color: #666; margin: 5px 0; }
+        .res-name { font-size: 1.5rem; font-weight: bold; color: var(--text); margin-bottom: 5px; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* --- DESKTOP / PC STYLES --- */
+        @media (min-width: 768px) {
+            .app-container {
+                padding: 40px;
+                gap: 40px;
+                align-items: flex-start;
+            }
+
+            /* Hide Mobile Nav, Show Desktop Sidebar */
+            .nav-bar {
+                position: relative;
+                width: 250px;
+                height: auto;
+                flex-direction: column;
+                background: transparent;
+                box-shadow: none;
+                padding: 0;
+                gap: 10px;
+            }
+
+            .nav-item {
+                text-align: left;
+                padding: 15px 25px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: var(--shadow);
+                font-size: 1.1rem;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            .nav-item.active { background: var(--primary); color: white; }
+            .nav-icon { margin-bottom: 0; font-size: 1.2rem; }
+
+            .content-area {
+                padding: 0;
+                overflow: visible;
+            }
+
+            /* Desktop Header adjustment */
+            .header-hero {
+                border-radius: var(--radius);
+                margin: 0 0 30px 0;
+                text-align: left;
+                display: flex;
+                align-items: center;
+                padding: 40px;
+            }
+            .logo-container { margin: 0 30px 0 0; width: 120px; height: 120px; }
+            
+            .numpad-grid { max-width: 100%; }
+            .num-btn { font-size: 1.2rem; padding: 25px; }
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <!-- === HOMEPAGE SECTION === -->
-    <div id="home-section" class="section active">
-        <div class="header-card">
-            <div class="logo-placeholder">IIC</div>
-            <h2>Indian Islahi Center</h2>
-            <p>Al Khobar</p>
-        </div>
-
-        <div class="info-card">
-            <h3>📅 Weekly Programs</h3>
-            <ul class="program-list">
-                <li><span>Jumu'ah Khutbah</span><span class="time-badge">Fri 12:30 PM</span></li>
-                <li><span>Quran Tafseer</span><span class="time-badge">Fri 8:00 PM</span></li>
-                <li><span>Ladies Halqa</span><span class="time-badge">Tue 4:30 PM</span></li>
-                <li><span>Youth Meet</span><span class="time-badge">Thu 9:00 PM</span></li>
-            </ul>
-        </div>
-
-        <div class="info-card">
-            <h3>📍 Location</h3>
-            <div class="map-container">
-                <iframe src="https://www.google.com/maps?q=Thuqbah+Indian+Islahi+Centre+Al+Khobar&output=embed" allowfullscreen="" loading="lazy"></iframe>
-            </div>
-        </div>
-    </div>
-
-    <!-- === RESULTS SECTION === -->
-    <div id="results-section" class="section">
-        <h2 style="color: var(--primary); text-align: center; margin-bottom: 20px;">QHLC Exam Results</h2>
-        
-        <select id="week-selector" class="week-select" onchange="loadWeek()">
-            <option value="" disabled selected>-- Select Exam Week --</option>
-        </select>
-
-        <div id="loading-spinner" class="loading-spinner">Loading Data...</div>
-
-        <div id="wait-view" class="locked-message" style="display: none;">
-            <span class="locked-icon">⏳</span>
-            <h3>Results Not Published</h3>
-            <p>Results for this week are being compiled.</p>
-        </div>
-
-        <div id="numpad-view" style="display: none;">
-            <div class="display-screen" id="display"></div>
-            <div class="numpad">
-                <button class="num-btn" onclick="appendNum('1')">1</button>
-                <button class="num-btn" onclick="appendNum('2')">2</button>
-                <button class="num-btn" onclick="appendNum('3')">3</button>
-                <button class="num-btn" onclick="appendNum('4')">4</button>
-                <button class="num-btn" onclick="appendNum('5')">5</button>
-                <button class="num-btn" onclick="appendNum('6')">6</button>
-                <button class="num-btn" onclick="appendNum('7')">7</button>
-                <button class="num-btn" onclick="appendNum('8')">8</button>
-                <button class="num-btn" onclick="appendNum('9')">9</button>
-                <button class="num-btn clear-btn" onclick="clearDisplay()">⌫</button>
-                <button class="num-btn" onclick="appendNum('0')">0</button>
-                <button class="num-btn search-btn" onclick="searchResult()">Check Result</button>
-            </div>
-            <div id="error-msg" class="error-msg"></div>
-        </div>
-
-        <div id="result-card" class="result-card">
-            <div class="result-row"><span style="color:#888">NAME</span> <span style="font-weight:bold" id="r-name"></span></div>
-            <div class="result-row"><span style="color:#888">PLACE</span> <span id="r-place"></span></div>
-            <div class="result-row"><span style="color:#888">WHATSAPP</span> <span id="r-wa"></span></div>
-            <div class="result-row" style="align-items:center">
-                <span style="color:#888">SCORE</span> <span class="score-badge" id="r-score"></span>
-            </div>
-        </div>
-    </div>
-
-    <!-- === BOTTOM NAVIGATION === -->
-    <div class="bottom-nav">
+<div class="app-container">
+    
+    <!-- PC Sidebar / Mobile Bottom Nav -->
+    <nav class="nav-bar">
         <div class="nav-item active" onclick="switchTab('home', this)">
-            <span class="nav-icon">🏠</span><span>Home</span>
+            <span class="nav-icon">🏠</span>
+            <span>Home</span>
         </div>
         <div class="nav-item" onclick="switchTab('results', this)">
-            <span class="nav-icon">📊</span><span>Results</span>
+            <span class="nav-icon">📊</span>
+            <span>Exam Results</span>
         </div>
-    </div>
+    </nav>
 
-    <script>
-        // --- TAB SWITCHING ---
-        function switchTab(tabName, element) {
-            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabName + '-section').classList.add('active');
-            element.classList.add('active');
-        }
+    <main class="content-area">
+        
+        <!-- === HOME TAB === -->
+        <div id="home-section" class="section active">
+            <div class="header-hero">
+                <div class="logo-container">
+                    <!-- Will try to load logo.png, fallback to text -->
+                    <img src="logo.png" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                    <span class="logo-text" style="display:none">IIC</span>
+                </div>
+                <div>
+                    <h1 class="center-name"></h1> <!-- Filled by JS -->
+                    <p class="center-loc"></p> <!-- Filled by JS -->
+                </div>
+            </div>
 
-        // --- LOAD CONFIG & DROPDOWN ---
-        window.onload = function() {
-            const selector = document.getElementById('week-selector');
-            if (typeof examConfig !== 'undefined') {
-                // Load weeks from config.js
-                examConfig.forEach(week => {
-                    const option = document.createElement('option');
-                    option.value = week.file; // We store the filepath as the value
-                    option.text = week.label;
-                    option.dataset.published = week.published; // Store status
-                    selector.add(option);
-                });
-            } else {
-                alert("Error: config.js not loaded. Check your file structure.");
-            }
-        };
+            <div class="card">
+                <h3 style="color:var(--primary); margin-top:0;">📅 Weekly Programs</h3>
+                <div id="programs-container"></div> <!-- Filled by JS -->
+            </div>
 
-        // --- DYNAMIC DATA LOADING ---
-        let currentWeekData = [];
-        let currentInput = "";
+            <div class="card">
+                <h3 style="color:var(--primary); margin-top:0;">📍 Location</h3>
+                <iframe id="gmap" class="map-frame" src="" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </div>
 
-        async function loadWeek() {
-            const selector = document.getElementById('week-selector');
-            const selectedOption = selector.options[selector.selectedIndex];
-            const fileUrl = selectedOption.value;
-            const isPublished = selectedOption.dataset.published === "true";
-
-            // Reset Views
-            document.getElementById('numpad-view').style.display = 'none';
-            document.getElementById('wait-view').style.display = 'none';
-            document.getElementById('result-card').style.display = 'none';
-            document.getElementById('loading-spinner').style.display = 'block';
-            currentInput = "";
-            document.getElementById('display').textContent = "";
-
-            if (!isPublished) {
-                document.getElementById('loading-spinner').style.display = 'none';
-                document.getElementById('wait-view').style.display = 'block';
-                return;
-            }
-
-            try {
-                // FETCH THE DATA FILE DYNAMICALLY
-                const response = await fetch(fileUrl);
-                if (!response.ok) throw new Error("File not found");
+        <!-- === RESULTS TAB === -->
+        <div id="results-section" class="section">
+            <div class="card" style="text-align: center;">
+                <h2 style="color:var(--primary); margin-top:0;">Check Your Score</h2>
+                <p style="color:#666; margin-bottom: 20px;">Select the exam week and enter your registered WhatsApp number.</p>
                 
-                currentWeekData = await response.json();
-                
-                document.getElementById('loading-spinner').style.display = 'none';
-                document.getElementById('numpad-view').style.display = 'block';
-            } catch (error) {
-                console.error(error);
-                document.getElementById('loading-spinner').style.display = 'none';
-                alert("Error loading data file. Make sure the file exists in the 'data' folder.");
-            }
+                <select id="week-selector" class="week-select" onchange="loadWeek()">
+                    <option value="" disabled selected>-- Select Exam Week --</option>
+                </select>
+
+                <!-- Status Messages -->
+                <div id="loading-spinner" style="display:none; color:var(--primary); padding:20px;">Loading Data...</div>
+                <div id="wait-view" style="display:none; padding:40px;">
+                    <div style="font-size:3rem;">⏳</div>
+                    <h3>Coming Soon</h3>
+                    <p>Results for this week have not been published yet.</p>
+                </div>
+
+                <!-- Search Interface -->
+                <div id="numpad-view" style="display:none;">
+                    <div class="display-screen" id="display"></div>
+                    <div class="numpad-grid">
+                        <button class="num-btn" onclick="appendNum('1')">1</button>
+                        <button class="num-btn" onclick="appendNum('2')">2</button>
+                        <button class="num-btn" onclick="appendNum('3')">3</button>
+                        <button class="num-btn" onclick="appendNum('4')">4</button>
+                        <button class="num-btn" onclick="appendNum('5')">5</button>
+                        <button class="num-btn" onclick="appendNum('6')">6</button>
+                        <button class="num-btn" onclick="appendNum('7')">7</button>
+                        <button class="num-btn" onclick="appendNum('8')">8</button>
+                        <button class="num-btn" onclick="appendNum('9')">9</button>
+                        <button class="num-btn clear-btn" onclick="clearDisplay()">DEL</button>
+                        <button class="num-btn" onclick="appendNum('0')">0</button>
+                        <button class="num-btn search-btn" onclick="searchResult()">Check Result</button>
+                    </div>
+                    <p id="error-msg" style="color: #d32f2f; display:none; margin-top:15px;"></p>
+                </div>
+            </div>
+
+            <!-- Result Display -->
+            <div id="result-card" class="result-box">
+                <div class="res-name" id="r-name"></div>
+                <div class="res-detail" id="r-place"></div>
+                <div class="res-detail" id="r-wa"></div>
+                <hr style="border:0; border-top:1px dashed #ccc; margin: 15px 0;">
+                <div style="font-size:0.9rem; color:#888; font-weight:bold;">YOUR SCORE</div>
+                <div class="res-score-big" id="r-score"></div>
+                <button onclick="resetSearch()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:20px; cursor:pointer; margin-top:10px;">Check Another</button>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    // --- INITIALIZATION ---
+    window.onload = function() {
+        // 1. Load Header Info
+        if (typeof centerInfo !== 'undefined') {
+            document.querySelector('.center-name').textContent = centerInfo.name;
+            document.querySelector('.center-loc').textContent = centerInfo.locationName;
+            document.getElementById('gmap').src = centerInfo.mapUrl;
         }
 
-        // --- NUMPAD LOGIC ---
-        function appendNum(num) {
-            if (currentInput.length < 10) {
-                currentInput += num;
-                document.getElementById('display').textContent = currentInput;
-            }
+        // 2. Load Programs
+        const progContainer = document.getElementById('programs-container');
+        if (typeof programsList !== 'undefined') {
+            programsList.forEach(prog => {
+                const div = document.createElement('div');
+                div.className = 'program-item';
+                div.innerHTML = `
+                    <div class="prog-info">
+                        <div class="prog-icon">${prog.icon}</div>
+                        <span style="font-weight:600;">${prog.title}</span>
+                    </div>
+                    <span class="prog-time">${prog.time}</span>
+                `;
+                progContainer.appendChild(div);
+            });
         }
-        function clearDisplay() {
-            currentInput = currentInput.slice(0, -1);
+
+        // 3. Load Week Dropdown
+        const selector = document.getElementById('week-selector');
+        if (typeof examConfig !== 'undefined') {
+            examConfig.forEach(week => {
+                const option = document.createElement('option');
+                option.value = week.file;
+                option.text = week.label;
+                option.dataset.published = week.published;
+                selector.add(option);
+            });
+        }
+    };
+
+    // --- NAVIGATION ---
+    function switchTab(tabName, element) {
+        document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(tabName + '-section').classList.add('active');
+        element.classList.add('active');
+    }
+
+    // --- RESULT LOGIC ---
+    let currentWeekData = [];
+    let currentInput = "";
+
+    async function loadWeek() {
+        const selector = document.getElementById('week-selector');
+        const selectedOption = selector.options[selector.selectedIndex];
+        const fileUrl = selectedOption.value;
+        const isPublished = selectedOption.dataset.published === "true";
+
+        // UI Reset
+        document.getElementById('numpad-view').style.display = 'none';
+        document.getElementById('wait-view').style.display = 'none';
+        document.getElementById('result-card').style.display = 'none';
+        document.getElementById('loading-spinner').style.display = 'block';
+        currentInput = "";
+        document.getElementById('display').textContent = "";
+
+        if (!isPublished) {
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('wait-view').style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch(fileUrl);
+            if (!response.ok) throw new Error("File not found");
+            currentWeekData = await response.json();
+            
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('numpad-view').style.display = 'block';
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loading-spinner').style.display = 'none';
+            alert("Could not load data. Please check config.js paths.");
+        }
+    }
+
+    function appendNum(num) {
+        if (currentInput.length < 10) {
+            currentInput += num;
             document.getElementById('display').textContent = currentInput;
         }
-        function searchResult() {
-            const errorEl = document.getElementById('error-msg');
-            const resultCard = document.getElementById('result-card');
-            const student = currentWeekData.find(s => s.whatsapp === currentInput);
+    }
 
-            if (student) {
-                errorEl.style.display = 'none';
-                resultCard.style.display = 'block';
-                document.getElementById('r-name').textContent = student.name;
-                document.getElementById('r-place').textContent = student.place;
-                document.getElementById('r-wa').textContent = student.whatsapp;
-                document.getElementById('r-score').textContent = student.score + " / 20";
-                if (student.score >= 20) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-            } else {
-                resultCard.style.display = 'none';
-                errorEl.textContent = "Number not found in this list.";
-                errorEl.style.display = 'block';
+    function clearDisplay() {
+        currentInput = currentInput.slice(0, -1);
+        document.getElementById('display').textContent = currentInput;
+    }
+
+    function searchResult() {
+        const errorEl = document.getElementById('error-msg');
+        const resultCard = document.getElementById('result-card');
+        const student = currentWeekData.find(s => s.whatsapp === currentInput);
+
+        if (student) {
+            errorEl.style.display = 'none';
+            document.getElementById('numpad-view').style.display = 'none'; // Hide keypad on success
+            resultCard.style.display = 'block';
+            
+            document.getElementById('r-name').textContent = student.name;
+            document.getElementById('r-place').textContent = student.place;
+            document.getElementById('r-wa').textContent = student.whatsapp;
+            document.getElementById('r-score').textContent = student.score + " / 20";
+
+            if (student.score >= 20) {
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
             }
+        } else {
+            errorEl.textContent = "Number not found in this week's list.";
+            errorEl.style.display = 'block';
         }
-    </script>
+    }
+
+    function resetSearch() {
+        document.getElementById('result-card').style.display = 'none';
+        document.getElementById('numpad-view').style.display = 'block';
+        currentInput = "";
+        document.getElementById('display').textContent = "";
+    }
+</script>
+
 </body>
 </html>
