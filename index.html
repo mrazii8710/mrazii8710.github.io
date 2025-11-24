@@ -2,99 +2,295 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Exam Results Lookup - kiic.online</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Results | KIIC Online</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f4f4f9; }
-        .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-        input[type="text"], button { padding: 12px; margin: 10px 0; width: 80%; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
-        button { background-color: #007bff; color: white; cursor: pointer; border: none; transition: background-color 0.3s; }
-        button:hover { background-color: #0056b3; }
-        #results-display { margin-top: 20px; text-align: left; padding: 15px; min-height: 80px; }
-        .error { color: red; font-weight: bold; }
-        .result-box { background-color: #e6f7ff; padding: 20px; border-radius: 8px; border-left: 5px solid #007bff; }
-    </style>
+    <!-- Load the separated data file -->
+    <script src="results.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sql.js-httpvfs@0.14.0/dist/sql-js-httpvfs.js"></script>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --primary-light: #007bff;
+            --bg-gradient: linear-gradient(135deg, #f6f9fc 0%, #eef2f7 100%);
+            --glass: rgba(255, 255, 255, 0.95);
+            --shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .main-card {
+            background: var(--glass);
+            padding: 2rem;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        h1 { color: var(--primary); margin-bottom: 0.5rem; font-size: 1.8rem; }
+        p.subtitle { color: #666; margin-bottom: 2rem; font-size: 0.9rem; }
+
+        /* Display Screen */
+        .display-screen {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #333;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.3s;
+        }
+
+        .display-screen.focused { border-color: var(--primary-light); }
+
+        /* Numpad Grid */
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .num-btn {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #444;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .num-btn:active { transform: scale(0.95); background-color: #f0f0f0; }
+        .num-btn.clear { color: #dc3545; background: #fff5f5; border-color: #ffc9c9; }
+        .num-btn.search-btn { 
+            background: var(--primary-light); 
+            color: white; 
+            grid-column: span 3;
+            font-size: 1.1rem;
+            padding: 18px;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+        }
+        .num-btn.search-btn:hover { background: var(--primary); }
+
+        /* Result Card */
+        #result-container {
+            display: none;
+            margin-top: 20px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .result-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-align: left;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 8px;
+        }
+        
+        .result-row:last-child { border-bottom: none; margin-bottom: 0; }
+        .label { color: #888; font-size: 0.85rem; font-weight: 600; }
+        .value { font-weight: bold; color: #333; font-size: 1rem; }
+
+        .score-badge {
+            background: var(--primary-light);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .full-score {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        .error-msg {
+            color: #dc3545;
+            background: #fff5f5;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Check Your Exam Results</h1>
-        <input type="text" id="mobileInput" placeholder="Enter Mobile Number (10 digits)" maxlength="10">
-        <button onclick="lookupResult()">Check Results</button>
-        
-        <div id="results-display">
-            Enter your mobile number above to securely check your result.
+
+    <div class="main-card">
+        <!-- Header -->
+        <h1>Weekly Results</h1>
+        <p class="subtitle">Enter your WhatsApp number to check</p>
+
+        <!-- Display -->
+        <div class="display-screen" id="display"></div>
+
+        <!-- Numpad -->
+        <div class="numpad">
+            <button class="num-btn" onclick="appendNum('1')">1</button>
+            <button class="num-btn" onclick="appendNum('2')">2</button>
+            <button class="num-btn" onclick="appendNum('3')">3</button>
+            <button class="num-btn" onclick="appendNum('4')">4</button>
+            <button class="num-btn" onclick="appendNum('5')">5</button>
+            <button class="num-btn" onclick="appendNum('6')">6</button>
+            <button class="num-btn" onclick="appendNum('7')">7</button>
+            <button class="num-btn" onclick="appendNum('8')">8</button>
+            <button class="num-btn" onclick="appendNum('9')">9</button>
+            <button class="num-btn clear" onclick="clearDisplay()">⌫</button>
+            <button class="num-btn" onclick="appendNum('0')">0</button>
+            <button class="num-btn" onclick="clearAll()">C</button>
+            <button class="num-btn search-btn" onclick="searchResult()">Search Result</button>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-msg" class="error-msg"></div>
+
+        <!-- Result Container -->
+        <div id="result-container">
+            <div class="result-card">
+                <div class="result-row">
+                    <span class="label">NAME</span>
+                    <span class="value" id="res-name"></span>
+                </div>
+                <div class="result-row">
+                    <span class="label">PLACE</span>
+                    <span class="value" id="res-place"></span>
+                </div>
+                <div class="result-row">
+                    <span class="label">WHATSAPP</span>
+                    <span class="value" id="res-whatsapp"></span>
+                </div>
+                <div class="result-row" style="align-items: center; margin-top: 10px;">
+                    <span class="label">SCORE</span>
+                    <span class="value score-badge" id="res-score"></span>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- Configuration for the SQLite Worker ---
-        const config = {
-          from: 'inline',
-          config: {
-            serverMode: 'full',
-            // IMPORTANT: This URL points to the file you uploaded in Phase 2
-            url: './results.sqlite', 
-            requestChunkSize: 4096, 
-          },
-        };
+        let currentInput = "";
+        const display = document.getElementById('display');
+        const errorMsg = document.getElementById('error-msg');
+        const resultContainer = document.getElementById('result-container');
 
-        let worker = null;
-
-        // Function to initialize the database connection
-        async function initDB() {
-          const { createDbWorker } = window.sql_js_httpvfs;
-          const workerUrl = 'https://cdn.jsdelivr.net/npm/sql.js-httpvfs@0.14.0/dist/sqlite.worker.js';
-          const wasmUrl = 'https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.wasm';
-          
-          return createDbWorker([config], workerUrl, wasmUrl);
+        function updateDisplay() {
+            display.textContent = currentInput;
+            display.classList.add('focused');
+            errorMsg.style.display = 'none';
+            resultContainer.style.display = 'none';
         }
 
-        // Function triggered when the user clicks the "Check Results" button
-        async function lookupResult() {
-          const mobile = document.getElementById('mobileInput').value.trim();
-          const display = document.getElementById('results-display');
-          display.innerHTML = 'Searching database...';
+        function appendNum(num) {
+            if (currentInput.length < 10) { // Limit to 10 digits usually
+                currentInput += num;
+                updateDisplay();
+            }
+        }
 
-          if (mobile.length !== 10) {
-            display.innerHTML = '<p class="error">Please enter a valid 10-digit mobile number.</p>';
-            return;
-          }
+        function clearDisplay() {
+            currentInput = currentInput.slice(0, -1);
+            updateDisplay();
+        }
 
-          try {
-            // 1. Initialize DB connection if it's the first lookup
-            if (!worker) {
-              display.innerHTML = 'Initializing secure connection...';
-              worker = await initDB();
+        function clearAll() {
+            currentInput = "";
+            updateDisplay();
+        }
+
+        function searchResult() {
+            if (!currentInput) {
+                showError("Please enter a number first");
+                return;
             }
 
-            // 2. Run the SQL query (only fetches the needed data chunk)
-            const result = await worker.db.query(
-              `SELECT name, score, grade FROM Results WHERE mobile_number = ?`, 
-              [mobile]
-            );
+            // Search logic using the data from results.js
+            // Using examResults array loaded from the external file
+            const student = examResults.find(s => s.whatsapp === currentInput);
 
-            if (result.length > 0) {
-              const student = result[0];
-              // 3. Display the found result beautifully!
-              display.innerHTML = `
-                <div class="result-box">
-                    <h2>✅ Result Found!</h2>
-                    <p><strong>Name:</strong> ${student.name}</p>
-                    <p><strong>Score:</strong> <span style="font-size: 1.8em; color: #007bff; font-weight: bold;">${student.score}</span></p>
-                    <p><strong>Grade:</strong> <span style="font-weight: bold; color: green;">${student.grade}</span></p>
-                </div>
-              `;
+            if (student) {
+                showResult(student);
             } else {
-              display.innerHTML = '<p class="error">Result not found for that mobile number.</p>';
+                showError("Result not found. Check the number and try again.");
+            }
+        }
+
+        function showResult(student) {
+            // Populate data
+            document.getElementById('res-name').textContent = student.name;
+            document.getElementById('res-place').textContent = student.place;
+            document.getElementById('res-whatsapp').textContent = student.whatsapp;
+            
+            const scoreEl = document.getElementById('res-score');
+            scoreEl.textContent = student.score + " / 20";
+
+            // Visual flair for full marks
+            if (student.score >= 20) {
+                scoreEl.classList.add('full-score');
+                triggerConfetti();
+            } else {
+                scoreEl.classList.remove('full-score');
             }
 
-          } catch (error) {
-            console.error("Database Error:", error);
-            display.innerHTML = `<p class="error">A serious error occurred. Make sure your 'results.sqlite' file is in the root directory.</p>`;
-          }
+            resultContainer.style.display = 'block';
+            errorMsg.style.display = 'none';
+        }
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.style.display = 'block';
+            resultContainer.style.display = 'none';
+        }
+
+        function triggerConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#28a745', '#007bff', '#ffc107']
+            });
         }
     </script>
 </body>
