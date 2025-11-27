@@ -3,11 +3,11 @@
 // ==================================================================
 
 // 1. CENTER DETAILS
-const centerInfo = {
-    name: "Indian Islahi Center",
-    location: "Khobar, Saudi Arabia",
+//const centerInfo = {
+    //name: "Indian Islahi Center",
+    //location: "Khobar, Saudi Arabia",
     // Exact coordinates extracted from your Google Maps link
-    mapEmbedUrl: "https://maps.google.com/maps?q=26.2869996,50.1996285&t=&z=17&ie=UTF8&iwloc=&output=embed"
+    //mapEmbedUrl: "https://maps.google.com/maps?q=26.2869996,50.1996285&t=&z=17&ie=UTF8&iwloc=&output=embed"
 };
 
 // 2. WEEKLY PROGRAMS (Edit this list to change the Home screen schedule)
