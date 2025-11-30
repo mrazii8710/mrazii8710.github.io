@@ -13,8 +13,7 @@ const centerInfo = {
 // 2. WEEKLY PROGRAMS (Edit this list to change the Home screen schedule)
 // Icons: 🕌 (Jumuah), 📖 (Quran), 🎓 (Class), 🌙 (Evening), 🤝 (Meeting)
 const programsList = [
-    { day: "Friday",  time: "1:00 PM", title: "Friday Weekly Class", icon: "🕌" },
-    { day: "Thursday",time: "After Isha Prayer", title: "Youth Executive Meet", icon: "🤝" }
+    { day: "Friday",  time: "1:00 PM", title: "Friday Weekly Class", icon: "🕌" }
 ];
 
 // 3. EXAM WEEKS CONFIGURATION
